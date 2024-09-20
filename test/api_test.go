@@ -57,7 +57,7 @@ func TestGetTodoById(t *testing.T) {
 
 	assert.Equal(t, "Getting task", responseTodo["description"])
 	assert.Equal(t, true, responseTodo["status"])
-	assert.Equal(t, 6, responseTodo["priority"])
+	assert.Equal(t, float64(6), responseTodo["priority"])
 
 }
 
@@ -118,7 +118,7 @@ func TestUpdateTodo(t *testing.T) {
 
 	assert.Equal(t, "Updated task description", responseTodo["description"])
 	assert.Equal(t, true, responseTodo["status"])
-	assert.Equal(t, 6, responseTodo["priority"])
+	assert.Equal(t, float64(6), responseTodo["priority"])
 }
 
 func TestDeleteTodo(t *testing.T) {
