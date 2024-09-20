@@ -32,8 +32,13 @@ func GetTodoById(c *gin.Context) {
 
 	todo, err := todoService.GetTodoById(id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
+		if err.Error() == "task not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, todo)
@@ -48,10 +53,13 @@ func CreateTodo(c *gin.Context) {
 		return
 	}
 
-	if err := todoService.CreateTodo(todo); err != nil {
+	id, err := todoService.CreateTodo(todo)
+	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
+
+	todo.ID = id
 
 	c.JSON(http.StatusCreated, todo)
 }
@@ -82,13 +90,19 @@ func UpdateTodo(c *gin.Context) {
 }
 
 func DeleteTodo(c *gin.Context) {
-	todoService := c.MustGet("todoservice").(*buisness.TodoService)
+	todoService := c.MustGet("todoService").(*buisness.TodoService)
 
 	idParam := c.Param("id")
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
+		if err.Error() == "task not found" {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
 	}
 
 	if err := todoService.DeleteTodo(id); err != nil {
@@ -96,5 +110,5 @@ func DeleteTodo(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "todo deleted"})
+	c.JSON(http.StatusNoContent, gin.H{"message": "todo deleted"})
 }

@@ -35,10 +35,12 @@ func (s *TodoService) GetTodos() ([]models.Todo, error) {
 	return todos, nil
 }
 
-func (s *TodoService) CreateTodo(todo models.Todo) error {
-	_, err := s.db.Exec("INSERT INTO todos (description, status, priority) VALUES (?,?,?)",
-		todo.Description, todo.Status, todo.Priority)
-	return err
+func (s *TodoService) CreateTodo(todo models.Todo) (int, error) {
+	var id int
+	err := s.db.QueryRow("INSERT INTO todos (description, status, priority) VALUES ($1,$2,$3) RETURNING id",
+		todo.Description, todo.Status, todo.Priority).Scan(&id)
+
+	return id, err
 }
 
 func (s *TodoService) GetTodoById(id int) (*models.Todo, error) {
