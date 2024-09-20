@@ -1,0 +1,67 @@
+name: Go CI and Docker
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout the code from the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Set up Go environment
+    - name: Set up Go 1.23.1
+      uses: actions/setup-go@v4
+      with:
+        go-version: 1.23.1
+
+    # Install dependencies
+    - name: Install dependencies
+      run: go mod download
+
+    # Run the linter
+    - name: Run Go fmt
+      run: go fmt ./...
+
+    # Run the tests
+    - name: Run Go tests
+      run: go test -v ./...
+
+    # Optional: Check for Go modules tidiness
+    - name: Check Go modules
+      run: go mod tidy -v
+
+    # Set up Docker Buildx (needed for advanced Docker build features)
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    # Log in to GHCR using GitHub Token
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Build Docker image and push it to GHCR
+    - name: Build and Push Docker image
+      run: |
+        # Get the first 8 characters of the commit hash
+        COMMIT_HASH=$(echo ${{ github.sha }} | cut -c1-8)
+        
+        # Define the image name
+        IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/todo-application
+
+        # Build and push Docker image with two tags: latest and commit hash
+        docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$COMMIT_HASH .
+        docker push $IMAGE_NAME:latest
+        docker push $IMAGE_NAME:$COMMIT_HASH
