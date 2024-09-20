@@ -79,11 +79,11 @@ jobs:
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.GHRC_TOKEN }}
 
     - name: Build and Push Docker image
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Required for authentication to push the image
+        GITHUB_TOKEN: ${{ secrets.GHRC_TOKEN }}  # Required for authentication to push the image
       run: |
         # Get the first 8 characters of the commit hash
         COMMIT_HASH=$(echo ${{ github.sha }} | cut -c1-8)
