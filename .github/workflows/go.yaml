@@ -18,17 +18,46 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # Cache Go modules
+    - name: Cache Go modules
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/go-build
+          ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
     # Set up Go environment
-    - name: Set up Go 1.23.1
+    - name: Set up Go 1.x
       uses: actions/setup-go@v4
       with:
-        go-version: 1.23.1
+        go-version: 1.x
 
     # Install dependencies
     - name: Install dependencies
       run: go mod download
 
-    # Run the linter
+    # Cache golangci-lint
+    - name: Cache golangci-lint
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/golangci-lint
+        key: ${{ runner.os }}-golangci-lint-${{ hashFiles('go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-golangci-lint-
+
+    # Install golangci-lint for linting Go code
+    - name: Install golangci-lint
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.53.2
+
+    # Run golangci-lint
+    - name: Run Go linter
+      run: golangci-lint run
+
+    # Run the linter (go fmt)
     - name: Run Go fmt
       run: go fmt ./...
 
@@ -43,6 +72,15 @@ jobs:
     # Set up Docker Buildx (needed for advanced Docker build features)
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+
+    # Cache Docker layers
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-docker-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
 
     # Log in to GHCR using GitHub Token
     - name: Log in to GitHub Container Registry
@@ -59,9 +97,9 @@ jobs:
         COMMIT_HASH=$(echo ${{ github.sha }} | cut -c1-8)
         
         # Define the image name
-        IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/todo-application
+        IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/my-go-app
 
-        # Build and push Docker image with two tags: latest and commit hash
-        docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$COMMIT_HASH .
+        # Build and push Docker image with cache
+        docker buildx build --cache-to type=inline --cache-from type=local,src=/tmp/.buildx-cache -t $IMAGE_NAME:latest -t $IMAGE_NAME:$COMMIT_HASH .
         docker push $IMAGE_NAME:latest
         docker push $IMAGE_NAME:$COMMIT_HASH
