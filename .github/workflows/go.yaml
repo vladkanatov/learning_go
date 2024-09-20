@@ -89,7 +89,7 @@ jobs:
         COMMIT_HASH=$(echo ${{ github.sha }} | cut -c1-8)
 
         # Define the image name
-        IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/todo-application
+        IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/todo_application
 
         # Build and push Docker image with caching
         if [ -d /tmp/.buildx-cache ]; then
