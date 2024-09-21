@@ -26,7 +26,7 @@ func createTask(description string, status bool, priority int) (*http.Request, *
 		"priority":    priority,
 	}
 	jsonData, _ := json.Marshal(todo)
-	req, _ := http.NewRequest("POST", "/todo", bytes.NewReader(jsonData))
+	req, _ := http.NewRequest("POST", "/todos", bytes.NewReader(jsonData))
 	resp := httptest.NewRecorder()
 	return req, resp
 }
@@ -54,7 +54,7 @@ func TestGetTodoById(t *testing.T) {
 	json.Unmarshal(resp.Body.Bytes(), &createdTodo)
 	id := int(createdTodo["id"].(float64))
 
-	req, _ = http.NewRequest("GET", fmt.Sprintf("/todo/%d", id), nil)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/todos/%d", id), nil)
 	resp = httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
 
@@ -96,7 +96,7 @@ func TestUpdateTodo(t *testing.T) {
 		"priority":    6,
 	}
 	jsonData, _ := json.Marshal(updatedTodo)
-	req, _ = http.NewRequest("PUT", fmt.Sprintf("/todo/%d", id), bytes.NewReader(jsonData))
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("/todos/%d", id), bytes.NewReader(jsonData))
 	req.Header.Set("Content-Type", "application/json")
 	resp = httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
@@ -124,13 +124,13 @@ func TestDeleteTodo(t *testing.T) {
 	json.Unmarshal(resp.Body.Bytes(), &createdTodo)
 	id := int(createdTodo["id"].(float64))
 
-	req, _ = http.NewRequest("DELETE", fmt.Sprintf("/todo/%d", id), nil)
+	req, _ = http.NewRequest("DELETE", fmt.Sprintf("/todos/%d", id), nil)
 	resp = httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
 
 	assert.Equal(t, http.StatusNoContent, resp.Code)
 
-	req, _ = http.NewRequest("GET", fmt.Sprintf("/todo/%d", id), nil)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/todos/%d", id), nil)
 	resp = httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
 
