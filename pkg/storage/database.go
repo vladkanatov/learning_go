@@ -32,11 +32,13 @@ func InitializeDatabase(db *sql.DB) error {
         description TEXT NOT NULL,
         status BOOLEAN NOT NULL DEFAULT false,
         priority INTEGER NOT NULL DEFAULT 0,
-		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        category_id INTEGER,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
     );
     `
 
-	// Запрос для создания таблицы `comment`
+	// Запрос для создания таблицы `comments`
 	commentTableQuery := `
     CREATE TABLE IF NOT EXISTS comments (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,8 +50,22 @@ func InitializeDatabase(db *sql.DB) error {
     );
     `
 
+	// Запрос для создания таблицы `categories`
+	categoryTableQuery := `
+    CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL
+    );
+    `
+
+	// Выполнение запроса для создания таблицы `categories`
+	_, err := db.Exec(categoryTableQuery)
+	if err != nil {
+		return err
+	}
+
 	// Выполнение запроса для создания таблицы `todos`
-	_, err := db.Exec(todoTableQuery)
+	_, err = db.Exec(todoTableQuery)
 	if err != nil {
 		return err
 	}
