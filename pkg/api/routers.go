@@ -13,11 +13,13 @@ func SetupRouter(db *storage.Database) *gin.Engine {
 	todoService := buisness.NewTodoService(db)
 	commentService := buisness.NewCommentService(db)
 	categoryService := buisness.NewCategoryService(db)
+	userService := buisness.NewUserService(db)
 
 	router.Use(func(c *gin.Context) {
 		c.Set("todoService", todoService)
 		c.Set("commentService", commentService)
 		c.Set("categoryService", categoryService)
+		c.Set("userService", userService)
 		c.Next()
 	})
 
@@ -38,6 +40,12 @@ func SetupRouter(db *storage.Database) *gin.Engine {
 	router.POST("/category", CreateCategory)
 	router.DELETE("/category/:id", DeleteCategory)
 	router.PUT("/category/:id", UpdateCategory)
+
+	router.GET("/users", GetUsers)
+	router.GET("/user/:id", GetUser)
+	router.POST("/user", CreateUser)
+	router.DELETE("/user/:id", DeleteUser)
+	router.PUT("/user/:id", UpdateUser)
 
 	return router
 }

@@ -25,28 +25,14 @@ func SetupDatabase() *Database {
 }
 
 func InitializeDatabase(db *sql.DB) error {
-	// Запрос для создания таблицы `todos`
-	todoTableQuery := `
-    CREATE TABLE IF NOT EXISTS todos (
+	// Запрос для создания таблицы `users`
+	userTableQuery := `
+    CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        description TEXT NOT NULL,
-        status BOOLEAN NOT NULL DEFAULT false,
-        priority INTEGER NOT NULL DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        category_id INTEGER,
-        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
-    );
-    `
-
-	// Запрос для создания таблицы `comments`
-	commentTableQuery := `
-    CREATE TABLE IF NOT EXISTS comments (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        todo_id INTEGER NOT NULL,
-        content TEXT NOT NULL,
-        author TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (todo_id) REFERENCES todos(id) ON DELETE CASCADE
+        username TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        password_hash TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     `
 
@@ -58,8 +44,42 @@ func InitializeDatabase(db *sql.DB) error {
     );
     `
 
+	// Запрос для создания таблицы `todos` с привязкой к пользователям
+	todoTableQuery := `
+    CREATE TABLE IF NOT EXISTS todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        description TEXT NOT NULL,
+        status BOOLEAN NOT NULL DEFAULT false,
+        priority INTEGER NOT NULL DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        user_id INTEGER NOT NULL,
+        category_id INTEGER,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
+    );
+    `
+
+	// Запрос для создания таблицы `comments` с привязкой к пользователям
+	commentTableQuery := `
+    CREATE TABLE IF NOT EXISTS comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        todo_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (todo_id) REFERENCES todos(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    `
+
+	// Выполнение запроса для создания таблицы `users`
+	_, err := db.Exec(userTableQuery)
+	if err != nil {
+		return err
+	}
+
 	// Выполнение запроса для создания таблицы `categories`
-	_, err := db.Exec(categoryTableQuery)
+	_, err = db.Exec(categoryTableQuery)
 	if err != nil {
 		return err
 	}
