@@ -13,8 +13,8 @@ type UserService struct {
 	db *storage.Database
 }
 
-func NewUserService(db *storage.Database) UserService {
-	return UserService{db}
+func NewUserService(db *storage.Database) *UserService {
+	return &UserService{db}
 }
 
 func hashPassword(password string) (string, error) {
@@ -33,7 +33,7 @@ func checkPassword(hashedPassword string, password string) bool {
 func (s *UserService) CreateUser(user *models.User) error {
 	password_hash, _ := hashPassword(user.Password)
 
-	err := s.db.QueryRow("INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, created_at",
+	err := s.db.QueryRow("INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, created_at",
 		user.Username, user.Email, password_hash).Scan(&user.ID, &user.CreatedAt)
 
 	return err
@@ -44,7 +44,7 @@ func (s *UserService) GetUser(id int) (*models.User, error) {
 
 	var user models.User
 
-	err := s.db.QueryRow("SELECT id, username, email, created_at WHERE id = ?", id).
+	err := s.db.QueryRow("SELECT id, username, email, created_at FROM users WHERE id = ?", id).
 		Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {

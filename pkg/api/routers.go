@@ -43,7 +43,7 @@ func SetupRouter(db *storage.Database) *gin.Engine {
 
 	router.GET("/users", GetUsers)
 	router.GET("/user/:id", GetUser)
-	router.POST("/user", CreateUser)
+	router.POST("/user/", CreateUser)
 	router.DELETE("/user/:id", DeleteUser)
 	router.PUT("/user/:id", UpdateUser)
 
