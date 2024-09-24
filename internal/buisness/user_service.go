@@ -96,3 +96,8 @@ func (s *UserService) DeleteUser(id int) error {
 	_, err := s.db.Exec("DELETE FROM users WHERE id = ?", id)
 	return err
 }
+
+func (s *UserService) LoginUser(user *models.User) error {
+	s.db.Query("")
+	return err
+}
