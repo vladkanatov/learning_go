@@ -19,11 +19,12 @@ func setupRouter() *gin.Engine {
 	return api.SetupRouter(db)
 }
 
-func createTask(description string, status bool, priority int) (*http.Request, *httptest.ResponseRecorder) {
+func createTask(description string, status bool, priority int, userID int) (*http.Request, *httptest.ResponseRecorder) {
 	todo := map[string]interface{}{
 		"description": description,
 		"status":      status,
 		"priority":    priority,
+		"user_id":     userID,
 	}
 	jsonData, _ := json.Marshal(todo)
 	req, _ := http.NewRequest("POST", "/todo", bytes.NewReader(jsonData))
@@ -44,7 +45,7 @@ func TestGetTodos(t *testing.T) {
 func TestGetTodoById(t *testing.T) {
 	router := setupRouter()
 
-	req, resp := createTask("Getting task", true, 6)
+	req, resp := createTask("Getting task", true, 6, 1)
 
 	router.ServeHTTP(resp, req)
 
@@ -70,7 +71,7 @@ func TestGetTodoById(t *testing.T) {
 func TestCreateTodo(t *testing.T) {
 	router := setupRouter()
 
-	req, resp := createTask("New task", false, 5)
+	req, resp := createTask("New task", false, 5, 1)
 
 	router.ServeHTTP(resp, req)
 
@@ -80,7 +81,7 @@ func TestCreateTodo(t *testing.T) {
 func TestUpdateTodo(t *testing.T) {
 	router := setupRouter()
 
-	req, resp := createTask("Update task", false, 2)
+	req, resp := createTask("Update task", false, 1, 1)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(resp, req)
 
@@ -114,7 +115,7 @@ func TestUpdateTodo(t *testing.T) {
 func TestDeleteTodo(t *testing.T) {
 	router := setupRouter()
 
-	req, resp := createTask("Delete task", false, 5)
+	req, resp := createTask("Delete task", false, 5, 1)
 	req.Header.Set("Content-Type", "application/json")
 	router.ServeHTTP(resp, req)
 

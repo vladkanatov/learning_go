@@ -5,4 +5,5 @@ type Todo struct {
 	Description string `json:"description"`
 	Status      bool   `json:"status"`
 	Priority    int    `json:"priority"`
+	UserID      int    `json:"user_id"`
 }

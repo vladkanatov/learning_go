@@ -37,8 +37,8 @@ func (s *TodoService) GetTodos() ([]models.Todo, error) {
 
 func (s *TodoService) CreateTodo(todo models.Todo) (int, error) {
 	var id int
-	err := s.db.QueryRow("INSERT INTO todos (description, status, priority) VALUES ($1,$2,$3) RETURNING id",
-		todo.Description, todo.Status, todo.Priority).Scan(&id)
+	err := s.db.QueryRow("INSERT INTO todos (description, status, priority, user_id) VALUES ($1, $2, $3, $4) RETURNING id",
+		todo.Description, todo.Status, todo.Priority, todo.UserID).Scan(&id)
 
 	return id, err
 }
