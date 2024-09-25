@@ -25,9 +25,9 @@ func hashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func checkPassword(hashedPassword string, password string) bool {
+func checkPassword(hashedPassword string, password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-	return err == nil
+	return err
 }
 
 func (s *UserService) CreateUser(user *models.User) error {
@@ -98,6 +98,17 @@ func (s *UserService) DeleteUser(id int) error {
 }
 
 func (s *UserService) LoginUser(user *models.User) error {
-	s.db.Query("")
-	return err
+	var password_hash string
+
+	err := s.db.QueryRow("SELECT id, username, email, password_hash FROM users WHERE username = ?",
+		user.Username).Scan(&user.ID, &user.Username, &user.Email, &password_hash)
+	if err != nil {
+		return err
+	}
+
+	if err := checkPassword(password_hash, user.Password); err != nil {
+		return errors.New("invalid password")
+	}
+
+	return nil
 }

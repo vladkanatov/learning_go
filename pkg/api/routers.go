@@ -46,6 +46,7 @@ func SetupRouter(db *storage.Database) *gin.Engine {
 	router.POST("/user/", CreateUser)
 	router.DELETE("/user/:id", DeleteUser)
 	router.PUT("/user/:id", UpdateUser)
+	router.POST("/login/", LoginHandler)
 
 	return router
 }

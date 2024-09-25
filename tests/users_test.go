@@ -126,3 +126,37 @@ func TestDelete(t *testing.T) {
 
 	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
+
+func TestLogin(t *testing.T) {
+	router := setupRouter()
+
+	req, resp := createUser("vladkanatov", "vlad.kanatik@ya.ru", "132465-Cs")
+
+	router.ServeHTTP(resp, req)
+
+	respBody := map[string]interface{}{
+		"username": "vladkanatov",
+		"password": "132465-Cs",
+	}
+	jsonData, _ := json.Marshal(&respBody)
+
+	req, _ = http.NewRequest("POST", "/login/", bytes.NewReader(jsonData))
+	resp = httptest.NewRecorder()
+
+	router.ServeHTTP(resp, req)
+
+	assert.Equal(t, http.StatusOK, resp.Code)
+
+	fakeRespBody := map[string]interface{}{
+		"username": "vladkanatov",
+		"password": "132465",
+	}
+	jsonData, _ = json.Marshal(&fakeRespBody)
+
+	req, _ = http.NewRequest("POST", "/login/", bytes.NewReader(jsonData))
+	resp = httptest.NewRecorder()
+
+	router.ServeHTTP(resp, req)
+
+	assert.Equal(t, http.StatusForbidden, resp.Code)
+}
