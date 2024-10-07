@@ -82,6 +82,7 @@ jobs:
         password: ${{ secrets.GHRC_TOKEN }}
 
     - name: Build and Push Docker image
+      if: github.event_name == 'push'
       env:
         GITHUB_TOKEN: ${{ secrets.GHRC_TOKEN }}  # Required for authentication to push the image
       run: |
