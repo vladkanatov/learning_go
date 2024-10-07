@@ -17,7 +17,7 @@ RUN go mod download
 COPY . .
 
 # Собираем бинарный файл с флагами оптимизации
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /todo-app ./cmd/main.go
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /todo-app ./cmd/main.go
 
 # Стадия 2: финальный контейнер
 FROM alpine:latest
